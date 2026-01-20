@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ItemInstance } from '@headless-tree/core';
-import { Folder, FolderOpen, File, ChevronRight, FileText, FileCode } from 'lucide-react';
+import { Folder, FolderOpen, File, ChevronRight, FileText, FileCode, Trash2Icon, ChevronDown } from 'lucide-react';
 import type { FileNode } from '../data/mockFileTree';
 import { cn } from '../lib/utils';
 
@@ -82,7 +82,7 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
     <div
       {...itemProps}
       className={cn(
-        "group relative flex items-center gap-2 px-3 py-2 rounded-md",
+        "group relative flex items-center gap-2 px-3 py-2 rounded-md pb-[5px] pt-[5px]",
         "transition-all duration-150 ease-in-out",
         "hover:bg-accent/50 hover:shadow-sm",
         ((isSelected && lastClickedTree === treeType) || isCrossTreeSelected) && "bg-[#b6bec9] border border-[#b6bec9] shadow-sm",
@@ -94,7 +94,7 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
         // Cursor style based on tree type and drag state
         treeType === "target" ? (isDragging ? "cursor-grabbing" : "cursor-move") : "cursor-pointer"
       )}
-      style={{ paddingLeft: `${level * 16 + 12}px` }}
+      style={{ paddingLeft: `${level * 16 + 12}px`}}
       onDragOver={(e) => {
         // Try custom handler first
         if (onDragOver) {
@@ -128,21 +128,13 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
     >
       {/* Expand/Collapse Arrow */}
       {isFolder && (
-        <button
-          className={cn(
-            "flex items-center justify-center p-0.5 rounded",
-            "transition-transform duration-200",
-            "hover:bg-accent/80",
-            isExpanded && "rotate-90"
-          )}
-          aria-label={isExpanded ? "Collapse" : "Expand"}
-        >
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
+        <>
+          {isExpanded ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+        </>
       )}
 
       {/* File/Folder Icon */}
-      <div className="flex items-center justify-center shrink-0">
+      <div className="flex items-center justify-center shrink-0 ml-10">
         {getFileIcon()}
       </div>
 
@@ -170,8 +162,6 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
           {itemName}
         </span>
       )}
-     
-
 
       {/* Drag Indicator (shown on hover for source tree files) */}
       {!isFolder && !showDelete && (
@@ -218,31 +208,11 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
             </svg>
           </div>
 
-          {/* Delete button */}
           {onDelete && (
-            <button
-              onClick={(e) => {
+            <Trash2Icon onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item.getId());
-              }}
-              className="p-1 rounded hover:bg-red-100 text-red-500 hover:text-red-700"
-              aria-label="Delete"
-              title="Delete"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+              }}/>
           )}
         </div>
       )}

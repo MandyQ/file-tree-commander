@@ -273,12 +273,12 @@ export const TargetTree = ({
         >
           {(() => {
             const items = targetTree.getItems();
-            console.log('targetTree.getItems():', items);
-            console.log('items.length:', items.length);
-            console.log('targetData:', targetData);
-            console.log('targetData.children:', targetData.children);
+            // console.log('targetTree.getItems():', items);
+            // console.log('items.length:', items.length);
+            // console.log('targetData:', targetData);
+            // console.log('targetData.children:', targetData.children);
             const hasItems = targetData.children && targetData.children.length > 0;
-            console.log('hasItems:', hasItems);
+            // console.log('hasItems:', hasItems);
 
             // Force tree to use the latest data
             if (hasItems && items.length === 0) {
