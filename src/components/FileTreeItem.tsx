@@ -34,7 +34,6 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
   // Check if this item is selected across trees
   const isCrossTreeSelected = selectedItemId === item.getId();
   
-
   // Determine file icon based on extension
   const getFileIcon = () => {
     if (isFolder) {
