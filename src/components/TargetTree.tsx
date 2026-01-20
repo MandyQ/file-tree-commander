@@ -26,6 +26,8 @@ interface TargetTreeProps {
   onSelect: (itemId: string) => void;
   selectedItemId: string | null;
   lastClickedTree: 'source' | 'target' | null;
+  expandedItems: string[];
+  setExpandedItems: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const TargetTree = ({
@@ -44,6 +46,8 @@ export const TargetTree = ({
   onSelect,
   selectedItemId,
   lastClickedTree,
+  expandedItems,
+  setExpandedItems,
 }: TargetTreeProps) => {
   console.log('TargetTree component rendered with targetData:', targetData);
 
@@ -146,6 +150,11 @@ export const TargetTree = ({
       hotkeysCoreFeature,
       dragAndDropFeature
     ],
+    // Use controlled expanded state to preserve folder open/close state
+    state: {
+      expandedItems,
+    },
+    setExpandedItems,
     // Enable reordering for internal drag and drop
     canReorder: true,
     // Increase the drop zone size at top/bottom of items (25% of item height each)

@@ -18,6 +18,7 @@ export const FileTreeCommander = () => {
   const [dataVersion, setDataVersion] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [lastClickedTree, setLastClickedTree] = useState<'source' | 'target' | null>(null);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   // Wrapper to increment version when target data changes
   const setTargetData = useCallback((update: React.SetStateAction<FileNode>) => {
@@ -312,6 +313,8 @@ export const FileTreeCommander = () => {
         onSelect={handleTargetSelection}
         selectedItemId={selectedItemId}
         lastClickedTree={lastClickedTree}
+        expandedItems={expandedItems}
+        setExpandedItems={setExpandedItems}
       />
     </div>
   );
