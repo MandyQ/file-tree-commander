@@ -82,7 +82,7 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
     <div
       {...itemProps}
       className={cn(
-        "group relative flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer",
+        "group relative flex items-center gap-2 px-3 py-2 rounded-md",
         "transition-all duration-150 ease-in-out",
         "hover:bg-accent/50 hover:shadow-sm",
         ((isSelected && lastClickedTree === treeType) || isCrossTreeSelected) && "bg-[#b6bec9] border border-[#b6bec9] shadow-sm",
@@ -90,7 +90,9 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
         !(isSelected && lastClickedTree === treeType) && !isFocused && !isCrossTreeSelected && "border border-transparent",
         isDragging && "opacity-40 cursor-grabbing",
         isDragOver && canDrop && "bg-blue-100 border-blue-400 border-2",
-        isDragOver && !canDrop && "bg-red-50 border-red-400 border-2"
+        isDragOver && !canDrop && "bg-red-50 border-red-400 border-2",
+        // Cursor style based on tree type and drag state
+        treeType === "target" ? (isDragging ? "cursor-grabbing" : "cursor-move") : "cursor-pointer"
       )}
       style={{ paddingLeft: `${level * 16 + 12}px` }}
       onDragOver={(e) => {
@@ -171,7 +173,7 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
      
 
 
-      {/* Drag Indicator (shown on hover for files) */}
+      {/* Drag Indicator (shown on hover for source tree files) */}
       {!isFolder && !showDelete && (
         <div className={cn(
           "opacity-0 group-hover:opacity-100 transition-opacity",
@@ -193,31 +195,56 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
         </div>
       )}
 
-      {/* Delete button (shown in target tree) */}
-      {showDelete && onDelete && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(item.getId());
-          }}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-red-100 text-red-500 hover:text-red-700 ml-auto"
-          aria-label="Delete"
-          title="Delete"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+      {/* Target tree controls: Drag handle + Delete button */}
+      {showDelete && (
+        <div className="flex items-center gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Drag handle */}
+          <div
+            className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 cursor-move"
+            title="Drag to reorder"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </div>
+
+          {/* Delete button */}
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(item.getId());
+              }}
+              className="p-1 rounded hover:bg-red-100 text-red-500 hover:text-red-700"
+              aria-label="Delete"
+              title="Delete"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

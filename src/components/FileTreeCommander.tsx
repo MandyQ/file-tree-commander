@@ -99,80 +99,89 @@ export const FileTreeCommander = () => {
     return tree;
   };
 
-  // Handle drop operations on target tree (for internal tree reordering)
+  // Handle drop operations on target tree (for both internal reordering and external drops)
   const handleDrop = useCallback((items: unknown[], target: any) => {
     console.log('=== handleDrop START ===');
+    console.log('Full target object:', JSON.stringify(target, null, 2));
     console.log('items:', items);
-    console.log('target:', target);
-    console.log('target type:', typeof target);
 
     setTargetData(prevData => {
-      console.log('Inside setTargetData callback');
       let newData = { ...prevData };
       const currentTargetItems = flattenTree(prevData);
 
       // Extract target information from the tree library's drop event
-      // The target object structure: { targetType, targetItem, parentItem, depth, index, ... }
       let targetParentId: string;
       let targetIndex: number | undefined;
 
       if (target.targetItem && typeof target.targetItem === 'object' && typeof target.targetItem.getId === 'function') {
         // target.targetItem is an ItemInstance
         const targetItem = target.targetItem;
-        const targetItemData = targetItem.getItemData?.() || targetItems[targetItem.getId()];
+        const targetItemId = targetItem.getId();
+        const targetItemData = targetItem.getItemData?.() || targetItems[targetItemId] || currentTargetItems[targetItemId];
 
-        if (target.targetType === 'item' && targetItemData?.isFolder) {
-          // Dropping onto a folder - add as child
-          targetParentId = targetItem.getId();
-          targetIndex = undefined; // Add to end
-          console.log('Drop type: INTO folder', targetParentId);
+        console.log('🎯 Target item ID:', targetItemId);
+        console.log('🎯 Target item data:', targetItemData);
+        console.log('🎯 Target type:', target.targetType);
+        console.log('🎯 Is folder:', targetItemData?.isFolder);
+        console.log('🎯 Parent item:', target.parentItem);
+        console.log('🎯 Depth:', target.depth);
+
+        // Check if dropping onto a folder
+        // Strategy: If the target item is a folder, always treat it as dropping INTO the folder
+        // unless we have explicit evidence it's a between-items drop
+        const isExplicitlyBetweenItems = target.targetType === 'between-items';
+        const isDropIntoFolder = targetItemData?.isFolder && !isExplicitlyBetweenItems;
+
+        if (isDropIntoFolder) {
+          // Dropping INTO a folder - add as child at the end
+          targetParentId = targetItemId;
+          targetIndex = undefined;
+          console.log('📁 ✅ Drop INTO folder:', targetParentId);
         } else if (target.parentItem) {
-          // Dropping between items - add to parent
+          // Dropping between items - use parent and index
           targetParentId = target.parentItem;
           targetIndex = target.index;
-          console.log('Drop type: BETWEEN items, parent:', targetParentId, 'index:', targetIndex);
+          console.log('📍 Drop BETWEEN items, parent:', targetParentId, 'index:', targetIndex);
         } else {
           // Fallback to root
           targetParentId = 'target-root';
           targetIndex = target.index;
-          console.log('Drop type: TO ROOT, index:', targetIndex);
+          console.log('🏠 Drop at ROOT, index:', targetIndex);
         }
       } else {
-        // Simple structure - use as is
+        // Simple structure
         targetParentId = target.parentItem || 'target-root';
         targetIndex = target.index;
-        console.log('Drop type: SIMPLE, parent:', targetParentId, 'index:', targetIndex);
+        console.log('📝 Drop SIMPLE, parent:', targetParentId, 'index:', targetIndex);
       }
 
-      // For each dragged item
+      // Process each dragged item
       for (const item of items) {
         const itemId = (item as { getId?: () => string }).getId ? (item as { getId: () => string }).getId() : (item as string);
-        console.log('Processing item:', itemId);
+        const isFromTarget = !!currentTargetItems[itemId];
+        console.log(`${isFromTarget ? '🔄' : '➕'} Processing ${isFromTarget ? 'internal' : 'external'} item:`, itemId);
 
-        // Single instance rule: Remove existing instance from target if it exists
-        if (currentTargetItems[itemId]) {
-          console.log('Removing existing instance of:', itemId);
-          newData = removeNodeById(newData, itemId);
-        }
-
-        // Get the source node (either from source or target tree)
-        const sourceNode = sourceItems[itemId] || currentTargetItems[itemId];
-        console.log('Source node:', sourceNode);
+        // Get the source node BEFORE removing it
+        // Priority: Use target tree version if it exists (preserves renames), otherwise use source tree
+        const sourceNode = currentTargetItems[itemId] || sourceItems[itemId];
         if (!sourceNode) {
-          console.log('No source node found for:', itemId);
+          console.log('❌ No source node found for:', itemId);
           continue;
         }
 
-        // Clone the node to avoid mutations
+        // Clone the node to avoid mutations (this preserves any renames or modifications)
         const nodeCopy = cloneNode(sourceNode);
 
-        console.log('Inserting into parent:', targetParentId, 'at index:', targetIndex);
+        // Remove existing instance from target if it exists (for both internal moves and duplicate prevention)
+        if (currentTargetItems[itemId]) {
+          newData = removeNodeById(newData, itemId);
+        }
 
-        // Insert into target tree
+        // Insert into target tree at the specified location
         newData = insertNode(newData, targetParentId, nodeCopy, targetIndex);
+        console.log('✅ Inserted into parent:', targetParentId, 'at index:', targetIndex);
       }
 
-      console.log('handleDrop result:', newData);
       console.log('=== handleDrop END ===');
       return newData;
     });
