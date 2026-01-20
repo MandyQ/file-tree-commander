@@ -212,7 +212,7 @@ export const TargetTree = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-t-xl border border-emerald-200 px-6 py-4 shadow-sm">
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-t-xl border border-emerald-200 px-6 py-5 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 shadow-md">
@@ -220,14 +220,11 @@ export const TargetTree = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <div>
-              <h2 className="font-bold text-lg text-gray-800">Target Structure</h2>
+            <div style={{'paddingLeft': 12}}>
+              <h2 className="font-bold text-lg text-gray-800 mb-1">Target Structure</h2>
               <p className="text-xs text-gray-600">Drag files here to organize</p>
             </div>
           </div>
-          <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
-            {/* Editable */}
-          </span>
         </div>
       </div>
 
@@ -311,7 +308,6 @@ export const TargetTree = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 </div>
-                <p className="text-gray-500 font-medium mb-1">Empty Structure</p>
                 <p className="text-sm text-gray-400">Drag files from the source tree to get started</p>
               </div>
             );

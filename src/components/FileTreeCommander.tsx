@@ -258,7 +258,7 @@ export const FileTreeCommander = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                 </svg>
               </div>
-              <div>
+              <div style={{'paddingLeft': 12}}>
                 <h2 className="font-bold text-lg text-gray-800">Source Files</h2>
                 <p className="text-xs text-gray-600">Read-only repository</p>
               </div>
