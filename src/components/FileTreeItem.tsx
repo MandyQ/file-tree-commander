@@ -27,9 +27,9 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
   const isFocused = item.isFocused();
   const level = item.getItemMeta().level;
   const itemName = item.getItemName();
-  const isDragging = item.isDragging?.() || false;
-  const isDragOver = item.isDragOver?.() || false;
-  const canDrop = item.canDrop?.() || false;
+  // For drag and drop state, we check if this item is being dragged over or is a drag target
+  const isDraggingOver = item.isDraggingOver?.() || false;
+  const isDragTarget = item.isDragTarget?.() || false;
 
   // Check if this item is selected across trees
   const isCrossTreeSelected = selectedItemId === item.getId();
@@ -88,11 +88,11 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
         ((isSelected && lastClickedTree === treeType) || isCrossTreeSelected) && "bg-[#b6bec9] border border-[#b6bec9] shadow-sm",
         isFocused && "ring-2 ring-[#b6bec9]/50 ring-offset-1",
         !(isSelected && lastClickedTree === treeType) && !isFocused && !isCrossTreeSelected && "border border-transparent",
-        isDragging && "opacity-40 cursor-grabbing",
-        isDragOver && canDrop && "bg-blue-100 border-blue-400 border-2",
-        isDragOver && !canDrop && "bg-red-50 border-red-400 border-2",
-        // Cursor style based on tree type and drag state
-        treeType === "target" ? (isDragging ? "cursor-grabbing" : "cursor-move") : "cursor-pointer"
+        // Visual feedback when this item is being dragged over or is a drag target
+        isDraggingOver && "bg-blue-100 border-blue-400 border-2",
+        isDragTarget && "bg-blue-50",
+        // Cursor style based on tree type
+        treeType === "target" ? "cursor-move" : "cursor-pointer"
       )}
       style={{ paddingLeft: `${level * 16 + 12}px`}}
       onDragOver={(e) => {

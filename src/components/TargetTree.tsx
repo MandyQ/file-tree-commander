@@ -49,13 +49,17 @@ export const TargetTree = ({
 
   // Handler for dropping source items onto target items/folders
   const handleItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    // Only intercept if dragging from source tree
+    // Always prevent default to allow drops
+    e.preventDefault();
+
     if (draggedItem) {
-      e.preventDefault();
+      // Dragging from source tree
       e.stopPropagation();
       e.dataTransfer.dropEffect = 'copy';
+    } else {
+      // Internal drag within target tree
+      e.dataTransfer.dropEffect = 'move';
     }
-    // Otherwise, let tree handle internal drag-drop
   }, [draggedItem]);
 
   const handleItemDrop = useCallback((e: React.DragEvent<HTMLDivElement>, targetItem: any) => {
@@ -142,6 +146,11 @@ export const TargetTree = ({
       hotkeysCoreFeature,
       dragAndDropFeature
     ],
+    // Enable reordering for internal drag and drop
+    canReorder: true,
+    // Increase the drop zone size at top/bottom of items (25% of item height each)
+    // This makes it easier to drop items above or below folders instead of into them
+    reorderAreaPercentage: 0.25,
     // Handle drops on target tree
     onDrop: (items, target) => {
       // Convert the newer API format to our expected format
@@ -228,49 +237,60 @@ export const TargetTree = ({
         </div>
       </div>
 
-      <div
-        className="flex-1 bg-white rounded-b-xl border-x border-b border-gray-200 shadow-lg overflow-auto"
-        onDragOver={(e) => {
-          // Prevent default to allow drops
-          e.preventDefault();
-          // Set effect based on drag source
-          if (draggedItem) {
-            e.dataTransfer.dropEffect = 'copy'; // Copying from source
-          } else {
-            e.dataTransfer.dropEffect = 'move'; // Moving within target
-          }
-        }}
-        onDrop={(e) => {
-          // Only intercept if dragging from source tree to empty space
-          if (draggedItem) {
-            console.log('Container drop from source tree');
-            e.preventDefault();
-            e.stopPropagation();
-            const itemId = e.dataTransfer.getData('text/plain');
+      <div className="flex-1 bg-white rounded-b-xl border-x border-b border-gray-200 shadow-lg overflow-auto">
+        {(() => {
+          const containerProps = targetTree.getContainerProps();
+          const originalOnDragOver = containerProps.onDragOver;
+          const originalOnDrop = containerProps.onDrop;
 
-            if (itemId) {
-              const sourceNode = sourceItems[itemId];
-              if (!sourceNode) return;
+          return (
+            <div
+              {...containerProps}
+              className="tree p-4 space-y-1 min-h-[200px]"
+              onDragOver={(e) => {
+                // For internal drags, call tree's original handler
+                if (!draggedItem && originalOnDragOver) {
+                  originalOnDragOver(e);
+                }
 
-              setTargetData(prevData => {
-                const newData = removeNodeById(prevData, itemId);
-                const nodeCopy = cloneNode(sourceNode);
-                return {
-                  ...newData,
-                  children: [...(newData.children || []), nodeCopy],
-                };
-              });
+                // For cross-tree drags from source, allow the drop
+                if (draggedItem) {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'copy';
+                }
+              }}
+              onDrop={(e) => {
+                // For internal drags, let tree handle it
+                if (!draggedItem && originalOnDrop) {
+                  originalOnDrop(e);
+                  return;
+                }
 
-              setDraggedItem(null);
-            }
-          }
-          // For internal drags, let the tree handle it via onDrop callback
-        }}
-      >
-        <div
-          {...targetTree.getContainerProps()}
-          className="tree p-4 space-y-1 min-h-[200px]"
-        >
+                // Only intercept if dragging from source tree to empty space
+                if (draggedItem) {
+                  console.log('Container drop from source tree');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const itemId = e.dataTransfer.getData('text/plain');
+
+                  if (itemId) {
+                    const sourceNode = sourceItems[itemId];
+                    if (!sourceNode) return;
+
+                    setTargetData(prevData => {
+                      const newData = removeNodeById(prevData, itemId);
+                      const nodeCopy = cloneNode(sourceNode);
+                      return {
+                        ...newData,
+                        children: [...(newData.children || []), nodeCopy],
+                      };
+                    });
+
+                    setDraggedItem(null);
+                  }
+                }
+              }}
+            >
           {(() => {
             const items = targetTree.getItems();
             // console.log('targetTree.getItems():', items);
@@ -297,8 +317,8 @@ export const TargetTree = ({
                   selectedItemId={selectedItemId}
                   treeType="target"
                   lastClickedTree={lastClickedTree}
-                  onDragOver={handleItemDragOver}
-                  onDrop={handleItemDrop}
+                  onDragOver={draggedItem ? handleItemDragOver : undefined}
+                  onDrop={draggedItem ? handleItemDrop : undefined}
                 />
               ))
             ) : (
@@ -312,7 +332,9 @@ export const TargetTree = ({
               </div>
             );
           })()}
-        </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
