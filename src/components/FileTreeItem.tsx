@@ -59,7 +59,7 @@ export const FileTreeItem = ({ item, onDelete, showDelete, onDragOver, onDrop, o
     if (editName.trim() && editName !== itemName && onRename) {
       onRename(item.getId(), editName.trim());
     } else {
-      setEditName(itemName); // 恢复原名
+      setEditName(itemName);
     }
   };
 

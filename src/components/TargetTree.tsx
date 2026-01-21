@@ -181,19 +181,19 @@ export const TargetTree = ({
         const targetItemData = dropTarget.item?.getItemData?.();
         const itemId = dropTarget.item?.getId();
 
-        console.log('🎯 Drop target analysis:');
-        console.log('  itemId:', itemId);
-        console.log('  itemData:', targetItemData);
-        console.log('  isFolder:', targetItemData?.isFolder);
-        console.log('  childIndex:', dropTarget.childIndex);
-        console.log('  insertionIndex:', dropTarget.insertionIndex);
+        // console.log('Drop target analysis:');
+        // console.log('itemId:', itemId);
+        // console.log('itemData:', targetItemData);
+        // console.log('isFolder:', targetItemData?.isFolder);
+        // console.log('childIndex:', dropTarget.childIndex);
+        // console.log('insertionIndex:', dropTarget.insertionIndex);
 
         // If dropping on a folder item, drop INTO it
         if (targetItemData?.isFolder) {
           convertedTarget.targetType = 'item'; // Dropping into folder
           convertedTarget.parentItem = itemId;
           convertedTarget.index = dropTarget.childIndex; // Position within folder's children
-          console.log('  ✅ Detected: Drop INTO folder');
+          // console.log('Detected: Drop INTO folder');
         } else {
           // Dropping between items
           convertedTarget.targetType = 'between-items';
@@ -212,11 +212,11 @@ export const TargetTree = ({
             convertedTarget.parentItem = findParent(targetData, itemId) || 'target-root';
           }
           convertedTarget.index = dropTarget.insertionIndex;
-          console.log('  ✅ Detected: Drop BETWEEN items');
+          console.log('Detected: Drop BETWEEN items');
         }
       }
 
-      console.log('🔍 onDrop - converted target:', convertedTarget);
+      console.log('onDrop - converted target:', convertedTarget);
       handleDrop(items, convertedTarget);
     },
     // Allow all drops - into folders, between items, etc.

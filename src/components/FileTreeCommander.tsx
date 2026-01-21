@@ -147,12 +147,12 @@ export const FileTreeCommander = () => {
         const targetItemId = targetItem.getId();
         const targetItemData = targetItem.getItemData?.() || targetItems[targetItemId] || currentTargetItems[targetItemId];
 
-        console.log('🎯 Target item ID:', targetItemId);
-        console.log('🎯 Target item data:', targetItemData);
-        console.log('🎯 Target type:', target.targetType);
-        console.log('🎯 Is folder:', targetItemData?.isFolder);
-        console.log('🎯 Parent item:', target.parentItem);
-        console.log('🎯 Depth:', target.depth);
+        // console.log('Target item ID:', targetItemId);
+        // console.log('Target item data:', targetItemData);
+        // console.log('Target type:', target.targetType);
+        // console.log('Is folder:', targetItemData?.isFolder);
+        // console.log('Parent item:', target.parentItem);
+        // console.log('Depth:', target.depth);
 
         // Check if dropping onto a folder
         // Strategy: If the target item is a folder, always treat it as dropping INTO the folder
@@ -164,36 +164,36 @@ export const FileTreeCommander = () => {
           // Dropping INTO a folder - add as child at the end
           targetParentId = targetItemId;
           targetIndex = undefined;
-          console.log('📁 ✅ Drop INTO folder:', targetParentId);
+          console.log('Drop INTO folder:', targetParentId);
         } else if (target.parentItem) {
           // Dropping between items - use parent and index
           targetParentId = target.parentItem;
           targetIndex = target.index;
-          console.log('📍 Drop BETWEEN items, parent:', targetParentId, 'index:', targetIndex);
+          // console.log('Drop BETWEEN items, parent:', targetParentId, 'index:', targetIndex);
         } else {
           // Fallback to root
           targetParentId = 'target-root';
           targetIndex = target.index;
-          console.log('🏠 Drop at ROOT, index:', targetIndex);
+          // console.log('Drop at ROOT, index:', targetIndex);
         }
       } else {
         // Simple structure
         targetParentId = target.parentItem || 'target-root';
         targetIndex = target.index;
-        console.log('📝 Drop SIMPLE, parent:', targetParentId, 'index:', targetIndex);
+        // console.log('Drop SIMPLE, parent:', targetParentId, 'index:', targetIndex);
       }
 
       // Process each dragged item
       for (const item of items) {
         const itemId = (item as { getId?: () => string }).getId ? (item as { getId: () => string }).getId() : (item as string);
         const isFromTarget = !!currentTargetItems[itemId];
-        console.log(`${isFromTarget ? '🔄' : '➕'} Processing ${isFromTarget ? 'internal' : 'external'} item:`, itemId);
+        console.log(`Processing ${isFromTarget ? 'internal' : 'external'} item:`, itemId);
 
         // Get the source node BEFORE removing it
         // Priority: Use target tree version if it exists (preserves renames), otherwise use source tree
         const sourceNode = currentTargetItems[itemId] || sourceItems[itemId];
         if (!sourceNode) {
-          console.log('❌ No source node found for:', itemId);
+          console.log('No source node found for:', itemId);
           continue;
         }
 
@@ -207,7 +207,7 @@ export const FileTreeCommander = () => {
 
         // Insert into target tree at the specified location
         newData = insertNode(newData, targetParentId, nodeCopy, targetIndex);
-        console.log('✅ Inserted into parent:', targetParentId, 'at index:', targetIndex);
+        console.log('Inserted into parent:', targetParentId, 'at index:', targetIndex);
       }
 
       console.log('=== handleDrop END ===');
