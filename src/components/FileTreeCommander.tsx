@@ -19,6 +19,7 @@ export const FileTreeCommander = () => {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [lastClickedTree, setLastClickedTree] = useState<'source' | 'target' | null>(null);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [sourceExpandedItems, setSourceExpandedItems] = useState<string[]>([]);
 
   // Wrapper to increment version when target data changes
   const setTargetData = useCallback((update: React.SetStateAction<FileNode>) => {
@@ -38,6 +39,32 @@ export const FileTreeCommander = () => {
 
     traverse(node);
     return items;
+  }, []);
+
+  // Helper: Find all parent folder IDs for a given item
+  const findParentFolders = useCallback((tree: FileNode, targetId: string): string[] => {
+    const parents: string[] = [];
+
+    const findPath = (node: FileNode, path: string[]): boolean => {
+      if (node.id === targetId) {
+        parents.push(...path);
+        return true;
+      }
+
+      if (node.children) {
+        const newPath = node.isFolder ? [...path, node.id] : path;
+        for (const child of node.children) {
+          if (findPath(child, newPath)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+
+    findPath(tree, []);
+    return parents;
   }, []);
 
   const sourceItems = useMemo(() => flattenTree(sourceData), [sourceData, flattenTree]);
@@ -207,6 +234,11 @@ export const FileTreeCommander = () => {
       hotkeysCoreFeature,
       dragAndDropFeature
     ],
+    // Use controlled expanded state to programmatically expand folders
+    state: {
+      expandedItems: sourceExpandedItems,
+    },
+    setExpandedItems: setSourceExpandedItems,
     // Allow dragging from source (to copy to target)
     canDrag: () => true,
     // Prevent dropping on source (read-only)
@@ -243,7 +275,19 @@ export const FileTreeCommander = () => {
     console.log('Target item selected:', itemId);
     setSelectedItemId(itemId);
     setLastClickedTree('target');
-  }, []);
+
+    // If this item exists in source tree, expand all its parent folders in source
+    if (sourceItems[itemId]) {
+      const parentFolders = findParentFolders(sourceData, itemId);
+      console.log('Expanding parent folders in source:', parentFolders);
+
+      // Add parent folders to source expanded items (keep existing expanded items too)
+      setSourceExpandedItems(prev => {
+        const newExpanded = new Set([...prev, ...parentFolders]);
+        return Array.from(newExpanded);
+      });
+    }
+  }, [sourceItems, sourceData, findParentFolders]);
 
 
 
